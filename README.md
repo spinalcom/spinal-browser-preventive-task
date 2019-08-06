@@ -1,2 +1,2 @@
 # spinal-browser-preventive-task
-browser for preventive task
+a specific browser for preventive-task.
