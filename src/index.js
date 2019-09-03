@@ -30,24 +30,13 @@ import Vue from "vue";
 import Vuetify from 'vuetify';
 import 'vuetify/dist/vuetify.min.css'
 
-// import VueBootstrap from "bootstrap-vue";
-// import VueInsProgressBar from "vue-ins-progress-bar";
 
-// import "bootstrap/dist/css/bootstrap.css";
-// import "bootstrap-vue/dist/bootstrap-vue.css";
 
-// import 'vue-sidebar-menu/dist/vue-sidebar-menu.css'
 
 import App from "./app.vue";
-// import VueSidebarMenu from 'vue-sidebar-menu/src/index'
 
-// Vue.use(VueSidebarMenu);import vu
-
-//import Vuesax from "vuesax";
-//import "vuesax/dist/vuesax.css";
 
 Vue.use(Vuetify);
-//Vue.use(Vuesax);
-/*Vue.use(VueMaterial);*/
+
 
 new Vue(App).$mount("#app");
