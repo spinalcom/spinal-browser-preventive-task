@@ -64,6 +64,35 @@ let utilities = {
         }
       }
     });
+  },
+
+  getVisitInfoById(contextId, groupId, visitId) {
+
+    let info = SpinalGraphService.getInfo(visitId);
+
+    if (typeof info !== "undefined") return Promise.resolve(info.get());
+
+    let context = SpinalGraphService.getInfo(contextId);
+    let groupInfo = SpinalGraphService.getInfo(groupId);
+
+    if (typeof groupInfo !== "undefined") {
+      return spinalVisitService.getGroupVisits(groupId, context.type.get())
+        .then(
+          res => {
+
+            for (let index = 0; index < res.length; index++) {
+              const id = res[index].info.id.get();
+              if (id === visitId) {
+                return res[index].info.get();
+              }
+
+            }
+            return undefined;
+          })
+    }
+
+
+    // return info ? info.get() : undefined
   }
 };
 

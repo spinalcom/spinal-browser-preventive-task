@@ -1,13 +1,19 @@
 <template>
   <div>
 
+    <event-dialog :showDialog="showEventDialog"
+                  :selectedEvent="eventSelected"
+                  @close="closeDialog"></event-dialog>
+
     <div class="header">
 
     </div>
 
     <div class="calendar">
       <vue-cal :time="false"
-               :events="events"></vue-cal>
+               :events="events"
+               :on-event-click="onEventClick"
+               events-on-month-view="short"></vue-cal>
     </div>
 
   </div>
@@ -16,16 +22,20 @@
 <script>
 import VueCal from "vue-cal";
 import "vue-cal/dist/vuecal.css";
-
+import eventDialog from "../calendarEventDialog/eventDialog.vue";
 export default {
   name: "calendarComponent",
   props: ["allData", "itemSelected"],
   components: {
-    "vue-cal": VueCal
+    "vue-cal": VueCal,
+    "event-dialog": eventDialog
   },
   data() {
     return {
-      events: []
+      events: [],
+      timer: null,
+      showEventDialog: false,
+      eventSelected: null
     };
   },
   methods: {
@@ -62,15 +72,19 @@ export default {
     },
 
     formatEventForCalendar(events, color) {
+      console.log(events);
       return events.map(el => {
         return {
-          id: el.id,
+          eventId: el.id,
+          visitId: el.visitId,
+          groupId: el.groupId,
+          contextId: this.itemSelected.visitId,
           color: color,
           start: this.formatDate(el.date),
           end: this.formatDate(el.date),
           title: el.name,
           //content: '<i class="v-icon material-icons">calendar_today</i>',
-          class: "leisure"
+          class: el.state
         };
       });
     },
@@ -79,6 +93,18 @@ export default {
       let date = new Date(argDate);
 
       return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+    },
+
+    onEventClick(event, e) {
+      console.log(event);
+      this.eventSelected = event;
+      e.stopPropagation();
+
+      this.showEventDialog = true;
+    },
+
+    closeDialog() {
+      this.showEventDialog = false;
     }
   },
   watch: {
@@ -119,8 +145,25 @@ export default {
   margin-bottom: 5px;
 }
 
-.vuecal__event.leisure {
+.vuecal__event.declared {
   background-color: rgba(81, 97, 247, 0.9);
   color: #fff;
 }
+
+.vuecal__event.done {
+  background-color: rgba(139, 243, 148, 0.9);
+  color: #fff;
+}
+
+.vuecal__event.processing {
+  background-color: rgba(241, 136, 245, 0.9);
+  color: #fff;
+}
+
+/* .vuecal__cell-events-count {
+  width: 18px;
+  height: 2px;
+  background: blue;
+  color: transparent;
+} */
 </style>
