@@ -13,10 +13,9 @@
 
       <div class="view-container">
         <app-viewer class="app-viewer-display"></app-viewer>
-
-        <calendar-component class="dataViewDisplay"
-                            :allData="data"
-                            :itemSelected="itemSelected"></calendar-component>
+        <app-container class="dataViewDisplay"
+                          :allData="data"
+                          :itemSelected="itemSelected"></app-container>
       </div>
     </div>
   </div>
@@ -30,7 +29,7 @@ import appViewer from "./components/viewer/viewer.vue";
 import appHeader from "./components/header/header.vue";
 import sidebar from "./components/sidebar/sidebar.vue";
 
-import calendarComponent from "./components/calendar/calendarComponent.vue";
+import appContainer from "./components/container/container.vue";
 
 // import dataService from "./config/data";
 
@@ -47,7 +46,7 @@ export default Vue.extend({
     "app-sidebar": sidebar,
     "app-viewer": appViewer,
     "app-header": appHeader,
-    "calendar-component": calendarComponent
+    "app-container": appContainer
   },
   created() {
     utilities.getAllData().then(allData => {

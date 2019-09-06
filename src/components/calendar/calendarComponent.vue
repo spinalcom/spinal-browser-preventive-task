@@ -1,19 +1,16 @@
 <template>
   <div>
 
-    <event-dialog :showDialog="showEventDialog"
+    <!-- <event-dialog :showDialog="showEventDialog"
                   :selectedEvent="eventSelected"
-                  @close="closeDialog"></event-dialog>
-
-    <div class="header">
-
-    </div>
+                  @close="closeDialog"></event-dialog> -->
 
     <div class="calendar">
       <vue-cal :time="false"
                :events="events"
                :on-event-click="onEventClick"
-               events-on-month-view="short"></vue-cal>
+               events-on-month-view="short"
+               :disable-views="['years', 'year']"></vue-cal>
     </div>
 
   </div>
@@ -22,111 +19,38 @@
 <script>
 import VueCal from "vue-cal";
 import "vue-cal/dist/vuecal.css";
-import eventDialog from "../calendarEventDialog/eventDialog.vue";
+// import eventDialog from "../calendarEventDialog/eventDialog.vue";
+
 export default {
   name: "calendarComponent",
-  props: ["allData", "itemSelected"],
+  props: ["allData", "itemSelected", "events", "eventSelected"],
   components: {
-    "vue-cal": VueCal,
-    "event-dialog": eventDialog
+    "vue-cal": VueCal
+    // "event-dialog": eventDialog
   },
   data() {
     return {
-      events: [],
-      timer: null,
-      showEventDialog: false,
-      eventSelected: null
+      showEventDialog: false
     };
   },
   methods: {
-    getAllEvents(visitId, groupId, state) {
-      let visitContext = this.allData.find(el => el.id === visitId);
-
-      if (typeof visitContext !== "undefined") {
-        let groups = this.getGroup(visitContext, groupId);
-        let events = groups.map(group => {
-          return this.getGroupEvent(group, state);
-        });
-
-        this.events = events.flat();
-      }
-    },
-
-    getGroup(visitContext, groupId) {
-      if (typeof groupId === "undefined") return visitContext.groups;
-
-      return visitContext.groups.filter(el => el.id === groupId);
-    },
-
-    getGroupEvent(group, state) {
-      if (typeof state !== "undefined")
-        return this.formatEventForCalendar(group.events[state], group.color);
-
-      let events = [
-        ...group.events["declared"],
-        ...group.events["processing"],
-        ...group.events["done"]
-      ];
-
-      return this.formatEventForCalendar(events, group.color);
-    },
-
-    formatEventForCalendar(events, color) {
-      console.log(events);
-      return events.map(el => {
-        return {
-          eventId: el.id,
-          visitId: el.visitId,
-          groupId: el.groupId,
-          contextId: this.itemSelected.visitId,
-          color: color,
-          start: this.formatDate(el.date),
-          end: this.formatDate(el.date),
-          title: el.name,
-          //content: '<i class="v-icon material-icons">calendar_today</i>',
-          class: el.state
-        };
-      });
-    },
-
-    formatDate(argDate) {
-      let date = new Date(argDate);
-
-      return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-    },
-
     onEventClick(event, e) {
-      console.log(event);
-      this.eventSelected = event;
       e.stopPropagation();
-
-      this.showEventDialog = true;
-    },
-
-    closeDialog() {
-      this.showEventDialog = false;
+      this.$emit("selectEvent", event);
+      // this.showEventDialog = true;
     }
-  },
-  watch: {
-    itemSelected(newValue) {
-      this.getAllEvents(newValue.visitId, newValue.groupId, newValue.state);
-    }
+
+    // closeDialog() {
+    //   this.showEventDialog = false;
+    // }
   }
 };
 </script>
 
 <style scoped>
-.header {
-  width: 100%;
-  height: 70px;
-  background-color: gray;
-  margin-bottom: 10px;
-}
-
 .calendar {
   width: 100%;
-  height: calc(100% - 90px);
-  border: 1px solid gray;
+  height: 98%;
 }
 </style>
 

@@ -33,7 +33,7 @@ let utilities = {
   async getAllData() {
     await graph.init();
     let res = this.getVisitsTypesContext().map(async visitContext => {
-      let groups = await this.getGroups(visitContext.type);
+      let groups = await this.getGroups(visitContext);
       visitContext["groups"] = await Promise.all(groups);
 
       return visitContext;
@@ -43,16 +43,32 @@ let utilities = {
 
   },
 
-  getGroups(visitType) {
-    return this.getVisitGroups(visitType).then(groups => {
+  getGroups(visitContext) {
+    return this.getVisitGroups(visitContext.type).then(groups => {
       return groups.map(async group => {
-        let events = await this.getGroupEvents(group.id, visitType);
+        let events = await this.getGroupEvents(group.id,
+          visitContext.type);
+        let states = await this.getGroupEventStates(visitContext.id,
+          group.id);
+
         group["events"] = typeof events !== "undefined" ? events :
         [];
+
+        group["states"] = typeof states !== "undefined" ? states :
+        [];
+
+
 
         return group;
       });
     });
+  },
+
+  getGroupEventStates(contextId, groupId) {
+    return spinalVisitService.getGroupEventStates(contextId, groupId).then(
+      states => {
+        return states.map(el => el.get())
+      });
   },
 
   getGroupEvents(groupId, visitType) {
@@ -93,6 +109,17 @@ let utilities = {
 
 
     // return info ? info.get() : undefined
+  },
+
+  getEventTasks(eventId) {
+    return spinalVisitService.getEventTasks(eventId).then(tasks => {
+      return tasks;
+    });
+  },
+
+  validateTask(contextId, taskId, groupId, eventId) {
+    return spinalVisitService.validateTask(contextId, groupId, eventId,
+      taskId);
   }
 };
 

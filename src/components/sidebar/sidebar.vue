@@ -31,7 +31,7 @@
 
         <div class="subItems">
           <div class="sidebarItem"
-               v-for="(state,index3) in states"
+               v-for="(state,index3) in group.states"
                :key="index3"
                @click="selectItem(item,group,state)"
                :class="{'isSelected' : isSelected(state)}">
@@ -56,21 +56,19 @@ export default {
   data() {
     return {
       expandSingle: false,
-      states: utilities.getVisitEventStates(),
       data: []
     };
   },
   props: ["allData", "itemSelected"],
   mounted() {
     this.data = Object.assign([], this.allData);
-    console.log(this.data);
   },
   methods: {
     selectItem(item, group, state) {
       let params = {
         visitId: item.id,
         groupId: typeof group !== "undefined" ? group.id : undefined,
-        state: typeof state !== "undefined" ? state.type : undefined
+        state: typeof state !== "undefined" ? state.state : undefined
       };
 
       this.$emit("selectItem", params);
@@ -89,7 +87,7 @@ export default {
       ) {
         return item.id === this.itemSelected.groupId;
       } else if (this.itemSelected && this.itemSelected.state) {
-        return item.type === this.itemSelected.state;
+        return item.state === this.itemSelected.state;
       }
     }
   }
