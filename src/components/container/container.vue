@@ -13,7 +13,8 @@
                       :allData="allData"
                       :itemSelectedInSidebar="itemSelected"
                       :eventSelected="eventSelected"
-                      @goback="goBack"></task-component>
+                      @goback="goBack"
+                      @reload="reloadAllData"></task-component>
     </div>
 
   </div>
@@ -81,6 +82,7 @@ export default {
           start: this.formatDate(el.date),
           end: this.formatDate(el.date),
           title: el.name,
+
           //content: '<i class="v-icon material-icons">calendar_today</i>',
           class: el.state
         };
@@ -99,11 +101,22 @@ export default {
 
     goBack() {
       this.eventSelected = null;
+    },
+    reloadAllData() {
+      this.$emit("reload");
     }
   },
   watch: {
     itemSelected(newValue) {
       this.getAllEvents(newValue.visitId, newValue.groupId, newValue.state);
+      this.eventSelected = null;
+    },
+    allData() {
+      this.getAllEvents(
+        this.itemSelected.visitId,
+        this.itemSelected.groupId,
+        this.itemSelected.state
+      );
     }
   }
 };

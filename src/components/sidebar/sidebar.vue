@@ -12,7 +12,7 @@
            @click="selectItem(item)"
            :class="{'isSelected' : isSelected(item)}">
 
-        <v-icon color="white">arrow_right</v-icon>
+        <v-icon color="#FFF">arrow_right</v-icon>
         <div class="listName">{{item.name}}</div>
 
       </div>
@@ -24,7 +24,7 @@
              @click="selectItem(item,group)"
              :class="{'isSelected' : isSelected(group)}">
 
-          <v-icon color="white">arrow_right</v-icon>
+          <v-icon color="#FFF">arrow_right</v-icon>
           <div class="listName">{{group.name}}</div>
 
         </div>
@@ -49,8 +49,6 @@
 </template>
 
 <script>
-import utilities from "../../config/utilities";
-
 export default {
   name: "appSidebar",
   data() {
@@ -68,7 +66,8 @@ export default {
       let params = {
         visitId: item.id,
         groupId: typeof group !== "undefined" ? group.id : undefined,
-        state: typeof state !== "undefined" ? state.state : undefined
+        state: typeof state !== "undefined" ? state.state : undefined,
+        stateId: typeof state !== "undefined" ? state.id : undefined
       };
 
       this.$emit("selectItem", params);
@@ -87,7 +86,7 @@ export default {
       ) {
         return item.id === this.itemSelected.groupId;
       } else if (this.itemSelected && this.itemSelected.state) {
-        return item.state === this.itemSelected.state;
+        return item.id === this.itemSelected.stateId;
       }
     }
   }

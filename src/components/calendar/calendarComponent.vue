@@ -5,12 +5,15 @@
                   :selectedEvent="eventSelected"
                   @close="closeDialog"></event-dialog> -->
 
+    <!-- events-on-month-view="short" -->
+
     <div class="calendar">
       <vue-cal :time="false"
                :events="events"
                :on-event-click="onEventClick"
+               :disable-views="['years', 'year']"
                events-on-month-view="short"
-               :disable-views="['years', 'year']"></vue-cal>
+               default-view="month"></vue-cal>
     </div>
 
   </div>
@@ -32,6 +35,9 @@ export default {
     return {
       showEventDialog: false
     };
+  },
+  mounted() {
+    console.log("hello", document.getElementsByName("vuecal__event"));
   },
   methods: {
     onEventClick(event, e) {
@@ -63,6 +69,10 @@ export default {
   padding: 5px;
 }
 
+/* .vuecal--month-view .vuecal__cell {
+  height: 180px;
+} */
+
 .vuecal__event-title {
   font-size: 1em;
   font-weight: bold;
@@ -75,12 +85,12 @@ export default {
 }
 
 .vuecal__event.done {
-  background-color: rgba(139, 243, 148, 0.9);
+  background-color: rgba(18, 228, 35, 0.9);
   color: #fff;
 }
 
 .vuecal__event.processing {
-  background-color: rgba(241, 136, 245, 0.9);
+  background-color: rgba(240, 180, 16, 0.973);
   color: #fff;
 }
 

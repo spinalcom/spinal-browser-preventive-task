@@ -14,8 +14,9 @@
       <div class="view-container">
         <app-viewer class="app-viewer-display"></app-viewer>
         <app-container class="dataViewDisplay"
-                          :allData="data"
-                          :itemSelected="itemSelected"></app-container>
+                       :allData="data"
+                       :itemSelected="itemSelected"
+                       @reload="reloadAllData"></app-container>
       </div>
     </div>
   </div>
@@ -56,6 +57,12 @@ export default Vue.extend({
   methods: {
     selectItem(res) {
       this.itemSelected = res;
+    },
+
+    reloadAllData() {
+      utilities.getAllData().then(allData => {
+        this.data = allData;
+      });
     }
 
     /*

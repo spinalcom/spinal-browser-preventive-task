@@ -1,39 +1,54 @@
 <template>
-  <div>
+  <div class="taskContainer">
     <div class="header">
+      <div class="backButton">
+        <v-btn class="goBackBtn ma-2"
+               flat
+               @click="goBack">
+          back
 
-      <v-btn class="goBackBtn ma-2"
-             flat
-             @click="goBack">
-        back
-
-      </v-btn>
+        </v-btn>
+      </div>
 
       <div class="name">
         {{eventSelected.title}}
       </div>
 
+      <div class="othersButtons"
+           @click="seeOrHideColor">
+        <v-btn flat
+               icon>
+          <v-icon>
+            {{ itemColored ? 'visibility_off' : 'remove_red_eye' }}
+          </v-icon>
+        </v-btn>
+      </div>
+
     </div>
 
-    <v-list two-line>
-      <v-list-tile v-for="(task,index) in tasks"
-                   :key="index">
-        <v-list-tile-content>
-          <v-list-tile-title>{{task.name}}</v-list-tile-title>
-        </v-list-tile-content>
+    <div class="taskListContainer">
+      <v-list two-line>
+        <v-list-tile v-for="(task,index) in tasks"
+                     :key="index"
+                     @click="OnItemClick(task)">
 
-        <v-list-tile-action>
-          <v-checkbox color="primary"
-                      v-model="task.done"
-                      @change="validItem(task)"></v-checkbox>
-        </v-list-tile-action>
+          <v-list-tile-content>
+            <v-list-tile-title>{{task.name}}</v-list-tile-title>
+          </v-list-tile-content>
 
-        <v-list-tile-action>
-          <v-icon>chat</v-icon>
-        </v-list-tile-action>
+          <v-list-tile-action>
+            <v-checkbox v-model="task.done"
+                        @change="validItem(task)"></v-checkbox>
+          </v-list-tile-action>
 
-      </v-list-tile>
-    </v-list>
+          <v-list-tile-action>
+            <v-icon>chat</v-icon>
+          </v-list-tile-action>
+
+        </v-list-tile>
+      </v-list>
+    </div>
+
   </div>
 </template>
 
@@ -45,7 +60,8 @@ export default {
   props: ["eventSelected", "allData", "itemSelectedInSidebar"],
   data() {
     return {
-      tasks: []
+      tasks: [],
+      itemColored: false
     };
   },
   created() {
@@ -55,32 +71,115 @@ export default {
   },
   methods: {
     goBack() {
+      this.clearThemingColor();
       this.$emit("goback");
     },
     validItem(item) {
-      // let allEventsId = [];
+      utilities
+        .validateTask(
+          this.itemSelectedInSidebar.visitId,
+          item.id,
+          item.groupId,
+          item.eventId
+        )
+        .then(() => {
+          if (this.itemColored) {
+            this.SeeSateInViewer();
+          }
+          this.$emit("reload");
+        });
+    },
 
-      // let context = this.allData.find(
-      //   el => el.id === this.eventSelected.visitid
-      // );
+    OnItemClick(task) {
+      let model =
+        window.spinal.BimObjectService.mappingBimFileIdModelId[task.bimFileId];
 
-      // console.log("context", context);
+      let itemsToFit = [];
 
-      // if (typeof context !== "undefined") {
-      //   let groupFound = context.groups.find(el => el.id === item.groupId);
-      //   if (typeof groupFound !== "undefined") {
-      //     console.log("groupFound", groupFound);
-      //     allEventsId =
-      //   }
-      // }
+      for (let j = 0; j < model.modelScene.length; j++) {
+        const scene = model.modelScene[j];
+        itemsToFit.push({
+          model: scene.model,
+          selection: [task.dbId]
+        });
+        scene.model.selector.setSelection([task.dbId], "selectOnly");
+      }
 
-      utilities.validateTask(
-        this.itemSelectedInSidebar.visitId,
-        item.id,
-        item.groupId,
-        item.eventId
+      window.spinal.SpinalForgeViewer.viewerManager.viewer.fitToView(
+        itemsToFit
       );
+    },
+
+    seeOrHideColor() {
+      window.spinal.SpinalForgeViewer.viewerManager.viewer.fitToView();
+
+      if (!this.itemColored) {
+        this.SeeSateInViewer();
+      } else {
+        this.clearThemingColor();
+      }
+    },
+
+    clearThemingColor() {
+      let modelsObj = window.spinal.BimObjectService.mappingBimFileIdModelId;
+      let models = [];
+
+      for (const key in modelsObj) {
+        if (modelsObj.hasOwnProperty(key)) {
+          const modelScene = modelsObj[key].modelScene;
+          for (const modelIterator of modelScene) {
+            models.push(modelIterator.model);
+          }
+        }
+      }
+
+      models.forEach(model => {
+        window.spinal.SpinalForgeViewer.viewerManager.viewer.clearThemingColors(
+          model
+        );
+      });
+
+      this.itemColored = false;
+    },
+
+    SeeSateInViewer() {
+      this.clearThemingColor();
+
+      let itemsDone = this.tasks.filter(el => el.done);
+      let itemNotDone = this.tasks.filter(el => !el.done);
+
+      let itemDoneColor = new THREE.Vector4(0, 255 / 255, 0, 1);
+      let itemNotDoneColor = new THREE.Vector4(255 / 255, 0, 0, 1);
+
+      this._colorItems(itemsDone, itemDoneColor);
+      this._colorItems(itemNotDone, itemNotDoneColor);
+
+      this.itemColored = true;
+    },
+
+    _colorItems(items, color) {
+      items.forEach(item => {
+        let model =
+          window.spinal.BimObjectService.mappingBimFileIdModelId[
+            item.bimFileId
+          ];
+
+        for (let j = 0; j < model.modelScene.length; j++) {
+          const scene = model.modelScene[j];
+
+          window.spinal.SpinalForgeViewer.viewerManager.viewer.setThemingColor(
+            item.dbId,
+            color,
+            scene.model
+          );
+        }
+      });
     }
+  },
+
+  destroyed() {
+    window.spinal.SpinalForgeViewer.viewerManager.viewer.fitToView();
+    this.clearThemingColor();
   }
 };
 </script>
@@ -93,6 +192,7 @@ export default {
   display: flex;
   background-color: gray;
   align-items: center;
+  justify-content: space-between;
 }
 
 .goBackBtn {
@@ -104,5 +204,16 @@ export default {
   font-size: 18px;
   text-transform: capitalize;
   font-weight: bold;
+}
+
+.taskContainer {
+  width: 100%;
+  height: 100%;
+}
+
+.taskListContainer {
+  height: calc(100% - 80px);
+  overflow: hidden;
+  overflow-y: auto;
 }
 </style>
