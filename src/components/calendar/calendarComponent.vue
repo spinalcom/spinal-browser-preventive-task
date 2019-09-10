@@ -13,7 +13,8 @@
                :on-event-click="onEventClick"
                :disable-views="['years', 'year']"
                events-on-month-view="short"
-               default-view="month"></vue-cal>
+               default-view="month"
+               :locale="'fr'"></vue-cal>
     </div>
 
   </div>
@@ -22,6 +23,7 @@
 <script>
 import VueCal from "vue-cal";
 import "vue-cal/dist/vuecal.css";
+import "vue-cal/dist/i18n/fr";
 // import eventDialog from "../calendarEventDialog/eventDialog.vue";
 
 export default {

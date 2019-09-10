@@ -1,45 +1,52 @@
 <template>
   <div class="mySidebarx md-scrollbar">
-    <div class="HeaderTitle">
-      Preventive tasks
+    <div class="HeaderTitle"
+         title="Gamme de maintenance">
+      Gamme de maintenance
     </div>
 
-    <div class="list-visitsContext"
-         v-for="(item,index) in data"
-         :key="index">
+    <div class="sidebarContainer">
+      <div class="list-visitsContext"
+           v-for="(item,index) in data"
+           :key="index">
 
-      <div class="name sidebarItem"
-           @click="selectItem(item)"
-           :class="{'isSelected' : isSelected(item)}">
-
-        <v-icon color="#FFF">arrow_right</v-icon>
-        <div class="listName">{{item.name}}</div>
-
-      </div>
-
-      <div class="subItems"
-           v-for="group in item.groups"
-           :key="group.id">
-        <div class="sidebarItem"
-             @click="selectItem(item,group)"
-             :class="{'isSelected' : isSelected(group)}">
+        <div class="name sidebarItem"
+             @click="selectItem(item)"
+             :class="{'isSelected' : isSelected(item)}"
+             :title="item.name">
 
           <v-icon color="#FFF">arrow_right</v-icon>
-          <div class="listName">{{group.name}}</div>
+          <div class="listName">{{item.name}}</div>
 
         </div>
 
-        <div class="subItems">
+        <div class="subItems"
+             v-for="group in item.groups"
+             :key="group.id">
           <div class="sidebarItem"
-               v-for="(state,index3) in group.states"
-               :key="index3"
-               @click="selectItem(item,group,state)"
-               :class="{'isSelected' : isSelected(state)}">
+               @click="selectItem(item,group)"
+               :class="{'isSelected' : isSelected(group)}"
+               :title="group.name">
 
-            <div class="listName">{{state.name}}</div>
+            <v-icon color="#FFF">arrow_right</v-icon>
+            <div class="listName">{{group.name}}</div>
+
           </div>
 
+          <div class="subItems">
+            <div class="sidebarItem"
+                 v-for="(state,index3) in group.states"
+                 :key="index3"
+                 @click="selectItem(item,group,state)"
+                 :class="{'isSelected' : isSelected(state)}"
+                 :title="state.name">
+
+              <div class="listName">{{state.name}}</div>
+            </div>
+
+          </div>
         </div>
+
       </div>
 
     </div>
@@ -104,19 +111,23 @@ export default {
 }
 
 .HeaderTitle {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: block;
   height: 50px;
+  overflow: hidden;
   border-bottom: 1px solid white;
   font-size: 16px;
   background-color: gray;
   text-transform: uppercase;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding-top: 15px;
+  padding-left: 5px;
 }
 
-.list-visitsContext {
+.sidebarContainer {
   width: 100%;
   height: calc(100% - 50px);
+  overflow: auto;
 }
 
 .sidebarItem {
