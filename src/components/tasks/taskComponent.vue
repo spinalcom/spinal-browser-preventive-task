@@ -67,10 +67,55 @@ export default {
   created() {
     utilities.getEventTasks(this.eventSelected.eventId).then(tasks => {
       this.tasks = tasks;
+
+      this.ExecuteSomethingOnBimObject(this.tasks, (model, ids) => {
+        window.spinal.SpinalForgeViewer.viewerManager.viewer.isolate(
+          ids,
+          model
+        );
+
+        window.spinal.SpinalForgeViewer.viewerManager.viewer.fitToView(
+          ids,
+          model
+        );
+      });
     });
   },
   methods: {
+    ExecuteSomethingOnBimObject(bimObjects, callback) {
+      bimObjects = this.getModelsAndBimObjects(bimObjects);
+      bimObjects.forEach(el => {
+        let model =
+          window.spinal.BimObjectService.mappingBimFileIdModelId[el.bimFileId];
+
+        for (let j = 0; j < model.modelScene.length; j++) {
+          const scene = model.modelScene[j];
+
+          callback(scene.model, el.selection);
+        }
+      });
+    },
+
+    getModelsAndBimObjects(tasks) {
+      let data = [];
+      tasks.forEach(task => {
+        let found = data.find(el => el.bimFileId === task.bimFileId);
+
+        if (typeof found !== "undefined") {
+          found.selection.push(task.dbId);
+        } else {
+          data.push({
+            bimFileId: task.bimFileId,
+            selection: [task.dbId]
+          });
+        }
+      });
+
+      return data;
+    },
+
     goBack() {
+      window.spinal.SpinalForgeViewer.viewerManager.viewer.showAll();
       this.clearThemingColor();
       this.$emit("goback");
     },
@@ -115,7 +160,11 @@ export default {
 
       if (!this.itemColored) {
         let itemsToFit = this.SeeSateInViewer();
-        console.log("itemsToFit", itemsToFit);
+
+        // this.ExecuteSomethingOnBimObject(itemsToFit, (model, selection) => {
+        //   console.log("model,selection", model, selection);
+        // });
+
         window.spinal.SpinalForgeViewer.viewerManager.viewer.fitToView(
           itemsToFit
         );
@@ -196,6 +245,7 @@ export default {
   },
 
   destroyed() {
+    window.spinal.SpinalForgeViewer.viewerManager.viewer.showAll();
     window.spinal.SpinalForgeViewer.viewerManager.viewer.fitToView();
     this.clearThemingColor();
   }
