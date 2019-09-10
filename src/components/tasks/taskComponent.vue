@@ -114,7 +114,11 @@ export default {
       window.spinal.SpinalForgeViewer.viewerManager.viewer.fitToView();
 
       if (!this.itemColored) {
-        this.SeeSateInViewer();
+        let itemsToFit = this.SeeSateInViewer();
+        console.log("itemsToFit", itemsToFit);
+        window.spinal.SpinalForgeViewer.viewerManager.viewer.fitToView(
+          itemsToFit
+        );
       } else {
         this.clearThemingColor();
       }
@@ -145,19 +149,26 @@ export default {
     SeeSateInViewer() {
       this.clearThemingColor();
 
+      let itemToFit = [];
+
       let itemsDone = this.tasks.filter(el => el.done);
       let itemNotDone = this.tasks.filter(el => !el.done);
 
       let itemDoneColor = new THREE.Vector4(0, 255 / 255, 0, 1);
       let itemNotDoneColor = new THREE.Vector4(255 / 255, 0, 0, 1);
 
-      this._colorItems(itemsDone, itemDoneColor);
-      this._colorItems(itemNotDone, itemNotDoneColor);
+      itemToFit.push(
+        ...this._colorItems(itemsDone, itemDoneColor),
+        ...this._colorItems(itemNotDone, itemNotDoneColor)
+      );
 
       this.itemColored = true;
+      return itemToFit;
     },
 
     _colorItems(items, color) {
+      let itemToFit = [];
+
       items.forEach(item => {
         let model =
           window.spinal.BimObjectService.mappingBimFileIdModelId[
@@ -172,8 +183,15 @@ export default {
             color,
             scene.model
           );
+
+          itemToFit.push({
+            model: scene.model,
+            selection: [item.dbId]
+          });
         }
       });
+
+      return itemToFit;
     }
   },
 
