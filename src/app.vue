@@ -1,30 +1,31 @@
 <template>
-  <div v-if="data"
+  <div v-if="sidebarData"
        class="container-fluid">
-    <app-header></app-header>
+    <app-header :digitalTwinName="digitaltwinName"></app-header>
     <div class="main-content"
          data-app>
       <div class="sidebarContext-display">
-        <app-sidebar :allData="data"
-                     :itemSelected="itemSelected"
-                     @selectItem="selectItem"></app-sidebar>
+        <app-sidebar :floors="sidebarData.floors"
+                     @selectFloor="selecFloor"
+                     :rooms="sidebarData.rooms"
+                     :allData="sidebarData"></app-sidebar>
 
       </div>
 
       <div class="view-container">
         <app-viewer class="app-viewer-display"></app-viewer>
+
         <app-container class="dataViewDisplay"
-                       :allData="data"
-                       :itemSelected="itemSelected"
-                       @reload="reloadAllData"></app-container>
+                       :allData="calendarData"
+                       :itemSelected="calendarItemSelected"
+                       @reload="reloadAllData"
+                       @selectItem="selectItem"></app-container>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { EventBus } from "./config/event";
-
 import Vue from "vue";
 import appViewer from "./components/viewer/viewer.vue";
 import appHeader from "./components/header/header.vue";
@@ -32,15 +33,19 @@ import sidebar from "./components/sidebar/sidebar.vue";
 
 import appContainer from "./components/container/container.vue";
 
-// import dataService from "./config/data";
+import dataService from "./config/data";
 
 import utilities from "./config/utilities";
 
 export default Vue.extend({
   data() {
     return {
-      data: null,
-      itemSelected: null
+      digitaltwinName: "",
+      calendarData: null,
+      sidebarData: null,
+      calendarItemSelected: null,
+      floorSelected: null,
+      bindObj: []
     };
   },
   components: {
@@ -50,92 +55,106 @@ export default Vue.extend({
     "app-container": appContainer
   },
   created() {
+    dataService.getAllData().then(allData => {
+      this.sidebarData = allData;
+    });
+
+    setTimeout(() => {
+      this.bindAllData();
+    }, 3000);
+
     utilities.getAllData().then(allData => {
-      this.data = allData;
+      this.digitaltwinName = utilities.getDigiDigitaltwinName();
+      this.calendarData = allData;
     });
   },
   methods: {
+    //////////////////////////////////////////////////////////////////
+    //                     calendar Data                            //
+    //////////////////////////////////////////////////////////////////
+
     selectItem(res) {
-      this.itemSelected = res;
+      this.calendarItemSelected = res;
     },
 
     reloadAllData() {
       utilities.getAllData().then(allData => {
-        this.data = allData;
+        this.calendarData = allData;
       });
-    }
+    },
 
-    /*
-      bindAllData() {
-        let self = this;
-        // console.log("binding", dataService.ContextNode, dataService.ProcessNodes, dataService.StepsNodes);
-        this.bindObj.push(dataService.ContextNode);
+    //////////////////////////////////////////////////////////////////
+    //                      SIDEBAR                                 //
+    //////////////////////////////////////////////////////////////////
+
+    bindAllData() {
+      let self = this;
+      this.bindObj.push(dataService.ContextNode);
+      this.bindObj.push(
+        dataService.ContextNode.bind(function() {
+          self.refreshBind();
+          dataService.getAllData().then(allData => {
+            self.updateData(allData);
+          });
+        }, false)
+      );
+
+      for (var ProcessNode in dataService.ProcessNodes) {
+        this.bindObj.push(dataService.ProcessNodes[ProcessNode]);
         this.bindObj.push(
-          dataService.ContextNode.bind(function() {
+          dataService.ProcessNodes[ProcessNode].bind(function() {
             self.refreshBind();
             dataService.getAllData().then(allData => {
               self.updateData(allData);
-              //self.data = allData;
             });
           }, false)
         );
-        for (var ProcessNode in dataService.ProcessNodes) {
-          this.bindObj.push(dataService.ProcessNodes[ProcessNode]);
-          this.bindObj.push(
-            dataService.ProcessNodes[ProcessNode].bind(function() {
-              self.refreshBind();
-              dataService.getAllData().then(allData => {
-                self.updateData(allData);
-                //self.data = allData;
-              });
-            }, false)
-          );
-        }
-        for (var Node in dataService.StepsNodes) {
-          this.bindObj.push(dataService.StepsNodes[Node]);
-          this.bindObj.push(
-            dataService.StepsNodes[Node].bind(function() {
-              self.refreshBind();
-              dataService.getAllData().then(allData => {
-                self.updateData(allData);
-                //self.data = allData;
-              });
-            }, false)
-          );
-        }
-        setTimeout(function() {
-          //     console.log("binobj = ", self.bindObj);
-        }, 2000);
-      },
-      refreshBind() {
-        let iterator = 0;
-        while (iterator > this.bindObj.length) {
-          this.bindObj[iterator].unbind(this.bindObj[iterator + 1]);
-          iterator = iterator + 2;
-        }
-      },
-      updateData(data) {
-        let self = this;
-        setTimeout(function() {
-          self.data = data;
-          self.bindAllData();
-        }, 500);
-        //EventBus.$emit("test", data);
-      },
-      onCollapsed(value) {
-        this.collapseMenu = value;
-      },
-      selecFloor(id) {
-        let self = this;
-        this.data.floors.forEach(function(el) {
-          if (el.id === id) {
-            self.floorSelected = el.name;
-          }
-        });
-        //console.log(id, "== id, data", this.data);
-        //this.floorSelected = id;
       }
-    */
+
+      for (var Node in dataService.StepsNodes) {
+        this.bindObj.push(dataService.StepsNodes[Node]);
+        this.bindObj.push(
+          dataService.StepsNodes[Node].bind(function() {
+            self.refreshBind();
+            dataService.getAllData().then(allData => {
+              self.updateData(allData);
+            });
+          }, false)
+        );
+      }
+
+      setTimeout(function() {
+        //     console.log("binobj = ", self.bindObj);
+      }, 2000);
+    },
+    refreshBind() {
+      let iterator = 0;
+
+      while (iterator > this.bindObj.length) {
+        this.bindObj[iterator].unbind(this.bindObj[iterator + 1]);
+        iterator = iterator + 2;
+      }
+    },
+    updateData(data) {
+      let self = this;
+      setTimeout(function() {
+        self.sidebarData = data;
+        self.bindAllData();
+      }, 500);
+      //EventBus.$emit("test", data);
+    },
+    onCollapsed(value) {
+      this.collapseMenu = value;
+    },
+
+    selecFloor(id) {
+      let self = this;
+      this.sidebarData.floors.forEach(function(el) {
+        if (el.id === id) {
+          self.floorSelected = el.name;
+        }
+      });
+    }
   }
 });
 </script>

@@ -9,13 +9,17 @@
            class="d-inline-block align-top"
            alt="spinalcom">
     </a>
+    <div class="digitalTwinName">
+      {{digitalTwinName}}
+    </div>
   </nav>
 </template>
 
 
 <script>
 export default {
-  name: "Header"
+  name: "Header",
+  props: ["digitalTwinName"]
 };
 </script>
 
@@ -26,10 +30,18 @@ export default {
   border-bottom: black;
   border-style: solid;
   border-width: 0px 0px 1px 0px;
+  display: flex;
+  align-items: center;
 }
 #spinalcomLogo {
-  padding:4px;
-  margin:4px 7px;
+  padding: 4px;
+  margin: 4px 7px;
+}
+
+.digitalTwinName {
+  margin: auto;
+  font-size: 1.5em;
+  font-weight: bold;
 }
 </style>
 

@@ -1,5 +1,10 @@
 <template>
   <div class="taskContainer">
+
+    <comment-dialog :showDialog="showCommentDialog"
+                    :itemSelected="itemSelected"
+                    @close="closeCommentDialog"></comment-dialog>
+
     <div class="header">
       <div class="backButton">
         <v-btn class="goBackBtn ma-2"
@@ -42,7 +47,12 @@
           </v-list-tile-action>
 
           <v-list-tile-action>
-            <v-icon>chat</v-icon>
+            <!-- <v-icon>chat</v-icon> -->
+            <v-btn @click.stop="openCommentDialog(task)"
+                   flat
+                   icon>
+              <v-icon>chat</v-icon>
+            </v-btn>
           </v-list-tile-action>
 
         </v-list-tile>
@@ -54,14 +64,20 @@
 
 <script>
 import utilities from "../../config/utilities";
+import commentDialog from "../commentDialog/commentDialog.vue";
 
 export default {
   name: "taskComponent",
   props: ["eventSelected", "allData", "itemSelectedInSidebar"],
+  components: {
+    "comment-dialog": commentDialog
+  },
   data() {
     return {
       tasks: [],
-      itemColored: false
+      itemColored: false,
+      showCommentDialog: false,
+      itemSelected: null
     };
   },
   created() {
@@ -241,6 +257,15 @@ export default {
       });
 
       return itemToFit;
+    },
+
+    openCommentDialog(task) {
+      this.showCommentDialog = true;
+      this.itemSelected = task;
+    },
+
+    closeCommentDialog() {
+      this.showCommentDialog = false;
     }
   },
 

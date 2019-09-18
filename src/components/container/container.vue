@@ -1,6 +1,35 @@
 <template>
-  <div>
-    <div class="content">
+
+  <div class="content">
+    <export-dialog :showDialog="showExportDialog"
+                   :data="allData"
+                   @close="closeExportDialog"></export-dialog>
+
+    <div class="_container"
+         :class="{'sidebarHidden' : !showSidebar}">
+      <div class="header">
+
+        <!-- <v-btn outline
+               color="indigo"
+               @click="loader = 'loading3'">
+          <v-icon left
+                  dark>file_download</v-icon>
+          Import
+        </v-btn> -->
+
+        <v-btn outline
+               color="indigo"
+               @click="openExportDialog">
+          <v-icon left
+                  dark>open_in_browser</v-icon>
+          Export
+        </v-btn>
+
+        <v-btn flat
+               icon>
+          <v-icon @click="expandOrHideSidebar">list</v-icon>
+        </v-btn>
+      </div>
       <calendar-component v-if="!eventSelected"
                           class="calendar"
                           :allData="allData"
@@ -17,25 +46,38 @@
                       @reload="reloadAllData"></task-component>
     </div>
 
+    <div class="sidebar"
+         v-if="showSidebar">
+      <calendar-sidebar :allData="allData"
+                        :itemSelected="itemSelected"
+                        @selectItem="selectItem"></calendar-sidebar>
+    </div>
+
   </div>
+
 </template>
 
 <script>
 import calendarComponent from "../calendar/calendarComponent.vue";
 import taskComponent from "../tasks/taskComponent.vue";
-
+import CalendarSidebar from "../calendarSidebar/sidebar.vue";
+import ExportDialog from "../exports/exportDialog.vue";
 export default {
   name: "appContainer",
   props: ["allData", "itemSelected"],
   components: {
     "calendar-component": calendarComponent,
-    "task-component": taskComponent
+    "task-component": taskComponent,
+    "calendar-sidebar": CalendarSidebar,
+    "export-dialog": ExportDialog
   },
   data() {
     return {
       events: [],
       timer: null,
-      eventSelected: null
+      eventSelected: null,
+      showSidebar: true,
+      showExportDialog: false
     };
   },
   methods: {
@@ -102,8 +144,25 @@ export default {
     goBack() {
       this.eventSelected = null;
     },
+
     reloadAllData() {
       this.$emit("reload");
+    },
+
+    expandOrHideSidebar() {
+      this.showSidebar = !this.showSidebar;
+    },
+
+    selectItem(res) {
+      this.$emit("selectItem", res);
+    },
+
+    openExportDialog() {
+      this.showExportDialog = true;
+    },
+
+    closeExportDialog() {
+      this.showExportDialog = false;
     }
   },
   watch: {
@@ -112,11 +171,13 @@ export default {
       this.eventSelected = null;
     },
     allData() {
-      this.getAllEvents(
-        this.itemSelected.visitId,
-        this.itemSelected.groupId,
-        this.itemSelected.state
-      );
+      if (this.itemSelected) {
+        this.getAllEvents(
+          this.itemSelected.visitId,
+          this.itemSelected.groupId,
+          this.itemSelected.state
+        );
+      }
     }
   }
 };
@@ -125,6 +186,29 @@ export default {
 <style scoped>
 .content {
   width: 100%;
+  height: 95%;
+  display: flex;
+}
+
+.content ._container {
+  width: 75%;
+  height: 100%;
+}
+
+.content ._container.sidebarHidden {
+  width: 100%;
+  height: 100%;
+}
+
+.content ._container .header {
+  width: 100%;
+  height: 5%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.content .sidebar {
+  width: 25%;
   height: 100%;
 }
 </style>

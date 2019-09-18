@@ -3,7 +3,21 @@ import graph from "./GraphService";
 
 let SpinalGraphService = graph.SpinalGraphService;
 
+
+import {
+  spinalIO
+} from "../config/spinal-io";
+import {
+  FileSystem
+} from "spinal-core-connectorjs_type";
+
+
 let utilities = {
+
+  getDigiDigitaltwinName() {
+    let argPath = spinalIO.getModelPath().split("/");
+    return argPath[argPath.length - 1];
+  },
 
   getVisitEventStates() {
     return spinalVisitService.EVENT_STATES;
@@ -32,6 +46,8 @@ let utilities = {
 
   async getAllData() {
     await graph.init();
+
+
     let res = this.getVisitsTypesContext().map(async visitContext => {
       let groups = await this.getGroups(visitContext);
       visitContext["groups"] = await Promise.all(groups);
@@ -120,7 +136,22 @@ let utilities = {
   validateTask(contextId, taskId, groupId, eventId) {
     return spinalVisitService.validateTask(contextId, groupId, eventId,
       taskId);
+  },
+
+  getAllUser() {
+    return spinalIO.getAlluser();
+  },
+
+  sendMessage(taskId, messageContent) {
+    let user = FileSystem._userid;
+
+    return spinalVisitService.addComment(taskId, user, messageContent);
+  },
+
+  getMessage(taskId) {
+    return spinalVisitService.getTasksComments(taskId);
   }
+
 };
 
 export default utilities;

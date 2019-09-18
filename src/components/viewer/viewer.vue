@@ -6,7 +6,7 @@
 
 <script>
 import { ForgeViewer } from "spinal-forge-viewer";
-import { EventBus } from "../../config/event";
+import { EventBus } from "../../js/event";
 
 import dataService from "../../config/data";
 import { setTimeout } from "timers";

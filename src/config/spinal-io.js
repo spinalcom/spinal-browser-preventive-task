@@ -192,6 +192,7 @@ class SpinalIO {
     const userDir = await this.load('/etc/UserProfileDir');
     for (let index = 0; index < userDir.length; index++) {
       const userFile = userDir[index];
+
       if (userFile.name.get() === user) {
         if (withAdminCheck === true) {
           return this.loadPtr(userFile).then(
@@ -208,6 +209,14 @@ class SpinalIO {
       }
     }
     throw new Error('Undefined User');
+  }
+
+
+  getAlluser() {
+    let path = "/etc/users";
+    return this.load(path).then(model => {
+      return model.get();
+    })
   }
 
 }

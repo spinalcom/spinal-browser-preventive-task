@@ -11,10 +11,25 @@
       <vue-cal :time="false"
                :events="events"
                :on-event-click="onEventClick"
-               :disable-views="['years', 'year']"
+               :disable-views="['years']"
+               events-count-on-year-view
                events-on-month-view="short"
                default-view="month"
-               :locale="'fr'"></vue-cal>
+               :locale="'fr'">
+
+        <template v-slot:today-button>
+          <!-- Using Vuetify -->
+          <v-tooltip>
+            <template v-slot:activator="{ on }">
+              <v-btn v-on="on">
+                <v-icon>my_location</v-icon>
+              </v-btn>
+              <span>Go to Today's date</span>
+            </template>
+          </v-tooltip>
+        </template>
+
+      </vue-cal>
     </div>
 
   </div>
@@ -58,7 +73,7 @@ export default {
 <style scoped>
 .calendar {
   width: 100%;
-  height: 98%;
+  height: 97%;
 }
 </style>
 
@@ -94,6 +109,19 @@ export default {
 .vuecal__event.processing {
   background-color: rgba(240, 180, 16, 0.973);
   color: #fff;
+}
+
+.vuecal__cell-events-count {
+  width: 24px;
+  height: 24px;
+  color: white;
+  border-radius: 10%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(81, 97, 247, 0.9);
+  font-weight: bold;
+  font-size: 1em;
 }
 
 /* .vuecal__cell-events-count {
