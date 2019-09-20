@@ -35,7 +35,7 @@ import appContainer from "./components/container/container.vue";
 
 import dataService from "./config/data";
 
-import utilities from "./config/utilities";
+import utilities from "./js/utilities";
 
 export default Vue.extend({
   data() {

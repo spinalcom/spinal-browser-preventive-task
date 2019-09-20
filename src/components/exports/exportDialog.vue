@@ -44,6 +44,19 @@
             </v-select>
 
             <!--
+                Visit Select
+            -->
+            <v-select v-if="groupSelected && groupSelected !== 'All'"
+                      v-model="visitSelected"
+                      :items="visits"
+                      item-value="id"
+                      item-text="name"
+                      label="Select Visit"
+                      :persistent-hint="true"
+                      hint="it will export all visits if no one selected">
+            </v-select>
+
+            <!--
                 Group Select
             -->
             <v-select v-model="stateSelected"
@@ -105,8 +118,8 @@
                color="blue"
                outline
                @click="exportExcelFile"
-               v-if="!isLoading && exportState === STATES.normal"
-               :disabled="contextSelected === null">
+               v-if="exportState === STATES.normal"
+               :disabled="contextSelected === null || isLoading">
           <v-icon>open_in_browser</v-icon>
           Export
         </v-btn>
@@ -128,6 +141,9 @@
 
 
 <script>
+import exportFile from "../../js/excel";
+import FileSaver from "file-saver";
+
 export default {
   name: "exportDialog",
   props: ["showDialog", "data"],
@@ -151,9 +167,11 @@ export default {
     return {
       allContexts: [],
       groups: [],
+      visits: [],
       states: [],
       contextSelected: null,
       groupSelected: null,
+      visitSelected: null,
       stateSelected: null,
       isLoading: false,
       exportState: this.STATES.normal
@@ -172,30 +190,66 @@ export default {
           id: el.id,
           color: el.color,
           name: el.name,
-          events: this.getEvents(el.events)
+          visits: this.getVisitSelected(el.visits, el.events)
         };
+      });
+    },
+
+    getVisitSelected(visits, events) {
+      let data = visits;
+      if (this.visitSelected && this.visitSelected !== "All") {
+        data = data.filter(el => el.id === this.visitSelected);
+      }
+
+      return data.map(el => {
+        let ev = [];
+
+        for (const key in events) {
+          if (events.hasOwnProperty(key)) {
+            ev.push(...events[key]);
+          }
+        }
+
+        el["events"] = this.getEvents(
+          ev.filter(element => element.visitId === el.id)
+        );
+
+        return el;
       });
     },
 
     getEvents(events) {
       if (this.stateSelected && this.stateSelected !== "All") {
-        return events[this.stateSelected];
-      }
-      let data = [];
-
-      for (const key in events) {
-        if (events.hasOwnProperty(key)) {
-          data.push(...events[key]);
-        }
+        return events.filter(el => el.state === this.stateSelected);
       }
 
-      return data;
+      return events;
     },
 
     exportExcelFile() {
       let dataToExport = this.getDataToExport();
+      let zipName = this.allContexts.find(el => el.id === this.contextSelected);
 
-      console.log(dataToExport);
+      this.isLoading = true;
+
+      exportFile(dataToExport)
+        .then(zip => {
+          zip
+            .generateAsync({ type: "blob" })
+            .then(content => {
+              FileSaver.saveAs(content, `${zipName.name}.zip`);
+              this.isLoading = false;
+              this.exportState = this.STATES.success;
+            })
+            .catch(() => {
+              this.isLoading = false;
+              this.exportState = this.STATES.error;
+            });
+        })
+        .catch(() => {
+          this.isLoading = false;
+          this.exportState = this.STATES.error;
+        });
     },
 
     selectContext() {
@@ -228,6 +282,11 @@ export default {
             state: "done"
           }
         ];
+
+        let found = this.groups.find(el => el.id === this.groupSelected);
+
+        this.visits = found ? found.visits : [];
+        this.visitSelected = null;
       } else {
         this.stateSelected = null;
       }
@@ -237,6 +296,18 @@ export default {
     },
     reInitState() {
       this.exportState = this.STATES.normal;
+    }
+  },
+  watch: {
+    data() {
+      if (this.data) {
+        this.allContexts = this.data.map(el => {
+          return {
+            id: el.id,
+            name: el.name
+          };
+        });
+      }
     }
   }
 };

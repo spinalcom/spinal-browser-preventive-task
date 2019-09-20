@@ -63,7 +63,7 @@
 </template>
 
 <script>
-import utilities from "../../config/utilities";
+import utilities from "../../js/utilities";
 import commentDialog from "../commentDialog/commentDialog.vue";
 
 export default {

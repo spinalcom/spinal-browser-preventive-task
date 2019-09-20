@@ -45,7 +45,7 @@
 
 <script>
 import itemComponent from "./item.vue";
-import utilities from "../../config/utilities";
+import utilities from "../../js/utilities";
 export default {
   name: "eventDialog",
   components: {

@@ -55,7 +55,7 @@
 
 <script>
 import messageItem from "./messageItem.vue";
-import utilities from "../../config/utilities";
+import utilities from "../../js/utilities";
 export default {
   name: "commentDialog",
   props: {
