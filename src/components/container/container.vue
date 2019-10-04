@@ -186,7 +186,7 @@ export default {
 <style scoped>
 .content {
   width: 100%;
-  height: 95%;
+  height: calc(100% - 50px);
   display: flex;
 }
 
@@ -202,7 +202,7 @@ export default {
 
 .content ._container .header {
   width: 100%;
-  height: 5%;
+  height: 50px;
   display: flex;
   justify-content: flex-end;
 }

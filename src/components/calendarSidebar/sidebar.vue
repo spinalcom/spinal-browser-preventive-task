@@ -150,6 +150,7 @@ export default {
 .mySidebarx {
   width: 100%;
   height: 100%;
+  padding-top: 0px;
   /* background-color: #272727; */
   overflow-x: hidden;
   overflow-y: auto;
@@ -158,7 +159,7 @@ export default {
 
 .HeaderTitle {
   display: block;
-  height: 5%;
+  height: 50px;
   overflow: hidden;
   border-bottom: 1px solid white;
   font-size: 16px;
@@ -204,5 +205,12 @@ div.isSelected {
   /* background-color: rgba(81, 97, 247, 0.9); */
   color: rgba(81, 97, 247, 0.9);
   font-weight: bold !important;
+}
+</style>
+
+<style>
+.mySidebarx.md-scrollbar .v-list__group:after,
+.mySidebarx.md-scrollbar .v-list__group:before {
+  height: 0px;
 }
 </style>
