@@ -15,12 +15,13 @@ export default class ExcelManager {
       workbook.created = new Date();
       workbook.name = visit.name;
 
-      let promises = visit.events.map((event => {
-        return this.createWorkSheet(workbook, event)
-      }))
+      // let promises = visit.events.map((event => {
+      //   return this.createWorkSheet(workbook, event)
+      // }))
 
-      promises = [this.createDetailWorkSheet(workbook, visit), ...
-        promises
+      let promises = [
+        this.createDetailWorkSheet(workbook, visit),
+        this.createWorkSheet(workbook, visit)
       ];
 
       return Promise.all(promises).then(() => {
@@ -131,22 +132,16 @@ export default class ExcelManager {
   }
 
 
-  createWorkSheet(workbook, event) {
-    let sheet = workbook.addWorksheet(this.getDate(event.date));
-
+  createWorkSheet(workbook, visit) {
+    let sheet = workbook.addWorksheet("events");
     sheet.state = "visible";
 
-    return this.generateSheetContent(sheet, event);
 
-  }
-
-  getDate(argDate) {
-    let date = new Date(argDate);
-    return `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
-  }
-
-  async generateSheetContent(sheet, event) {
-
+    /*
+    ---------------------------------------------------------------------------
+                                        Header
+    ---------------------------------------------------------------------------
+    */
     let columns = [{
         header: "Equipment Name",
         key: "name",
@@ -158,20 +153,47 @@ export default class ExcelManager {
         width: 15
       },
       {
+        header: "Date",
+        key: "date",
+        width: 40
+      },
+      {
+        header: "Visit",
+        key: "visit",
+        width: 40
+      },
+      {
         header: "Is done",
         key: "done",
         width: 10
-      },
-      // {
-      //   header: "Last Commentaire",
-      //   key: "comment",
-      //   width: 20
-      // }
+      }
     ]
 
     sheet.columns = columns;
 
     this.changeHeaderStyle(sheet);
+
+    /*
+    ---------------------------------------------------------------------------
+                                        Header
+    ---------------------------------------------------------------------------
+    */
+
+    let promises = visit.events.map(event => this.generateSheetContent(sheet,
+      event,
+      visit.name));
+
+    return Promise.all(promises);
+  }
+
+  getDate(argDate) {
+    let date = new Date(argDate);
+    return `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
+  }
+
+  async generateSheetContent(sheet, event, visitName) {
+
+
 
     let tasks = await utilities.getEventTasks(event.id);
 
@@ -180,7 +202,9 @@ export default class ExcelManager {
       return {
         name: el.name,
         id: el.dbId,
-        done: el.done ? "Done" : "Not Done"
+        done: el.done ? "Done" : "Not Done",
+        date: this.getDate(event.date),
+        visit: visitName
       }
     })
 
