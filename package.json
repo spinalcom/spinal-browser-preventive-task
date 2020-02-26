@@ -1,26 +1,4 @@
 {
-  "_from": "git+https://github.com/spinalcom/spinal-browser-preventive-task.git",
-  "_id": "spinal-browser-preventive-task@1.0.1",
-  "_inBundle": false,
-  "_integrity": "",
-  "_location": "/spinal-browser-preventive-task",
-  "_phantomChildren": {},
-  "_requested": {
-    "type": "git",
-    "raw": "spinal-browser-preventive-task@git+https://github.com/spinalcom/spinal-browser-preventive-task.git",
-    "name": "spinal-browser-preventive-task",
-    "escapedName": "spinal-browser-preventive-task",
-    "rawSpec": "git+https://github.com/spinalcom/spinal-browser-preventive-task.git",
-    "saveSpec": "git+https://github.com/spinalcom/spinal-browser-preventive-task.git",
-    "fetchSpec": "https://github.com/spinalcom/spinal-browser-preventive-task.git",
-    "gitCommittish": null
-  },
-  "_requiredBy": [
-    "/"
-  ],
-  "_resolved": "git+https://github.com/spinalcom/spinal-browser-preventive-task.git#322df5f41c0557124d9cb3dbac2e8cf984c11adf",
-  "_spec": "spinal-browser-preventive-task@git+https://github.com/spinalcom/spinal-browser-preventive-task.git",
-  "_where": "/home/spinalcom/Documents/spinal/multiMakette",
   "author": "",
   "bin": {
     "create_preventive-task_env": "bin/parcel.config.js"
@@ -34,7 +12,6 @@
   "browserslist": [
     "last 1 chrome versions"
   ],
-  "bundleDependencies": false,
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.8.1",
     "aes-js": "^3.1.2",
@@ -42,32 +19,40 @@
     "bootstrap": "^4.3.1",
     "bootstrap-vue": "^2.0.0-rc.16",
     "config": "^3.2.2",
+    "element-ui": "^2.13.0",
+    "eva-icons": "^1.1.2",
     "exceljs": "^2.0.1",
     "file-saver": "^2.0.2",
-    "jquery": "^3.3.1",
+    "jquery": "^3.4.1",
     "jszip": "^3.2.2",
-    "lodash.throttle": "4.1.1",
+    "lodash.throttle": "^4.1.1",
     "material-icons": "^0.3.1",
     "moment": "^2.24.0",
-    "parcel-bundler": "^1.12.3",
+    "parcel-bundler": "^1.12.4",
     "selectbar": "^1.0.1",
     "spinal-core-connectorjs_type": "git+https://github.com/spinalcom/spinal-core-connectorjs_type.git",
     "spinal-core-system": "git+https://github.com/spinalcom/spinal-core-system.git",
     "spinal-env-drive-core": "git+https://github.com/spinalcom/spinal-env-drive-core.git",
     "spinal-env-preventive-task-btn-joint": "git+https://github.com/spinalcom/spinal-env-preventive-task-btn-joint.git",
+    "spinal-env-viewer-context-geographic-service": "git+https://github.com/spinalcom/spinal-env-viewer-context-geographic-service.git",
     "spinal-env-viewer-context-menu-service": "git+https://github.com/spinalcom/spinal-env-viewer-context-menu-service.git",
     "spinal-env-viewer-graph-service": "git+https://github.com/spinalcom/Spinal-Graph-Service.git",
     "spinal-env-viewer-task-service": "git+https://github.com/spinalcom/spinal-env-viewer-task-service.git",
+    "spinal-forge-viewer": "git+https://github.com/spinalcom/spinal-forge-viewer.git",
     "spinal-forge-viewer-vue": "git+https://github.com/spinalcom/spinal-forge-viewer-vue.git",
+    "spinal-model-graph": "git+https://github.com/spinalcom/spinal-model-graph.git",
+    "spinal-service-ticket": "git+https://github.com/spinalcom/spinal-service-ticket.git",
     "store": "^2.0.12",
-    "vue": "^2.6.10",
+    "velocity-animate": "^1.5.2",
+    "vue": "^2.6.11",
     "vue-cal": "^2.4.0",
+    "vue-i18n": "^8.15.4",
     "vue-material": "^1.0.0-beta-11",
+    "vue-ripple-directive": "^2.0.1",
     "vue-router": "3.0.6",
     "vue-sidebar-menu": "^3.6.3",
     "vuetify": "^1.5.18"
   },
-  "deprecated": false,
   "description": "a specific browser for preventive-task.",
   "devDependencies": {
     "@babel/core": "^7.4.5",
@@ -76,6 +61,7 @@
     "@babel/plugin-transform-runtime": "^7.4.4",
     "@vue/component-compiler-utils": "^2.6.0",
     "babel-preset-es2017": "^6.24.1",
+    "parcel-plugin-static-files-copy": "^2.3.1",
     "stylus": "^0.54.5"
   },
   "keywords": [],
@@ -90,5 +76,8 @@
     "spinal-register": "spinal-register --browser 'spinal-browser-'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "version": "1.0.1"
+  "version": "1.0.1",
+  "staticFiles": {
+    "staticPath": "src/public"
+  }
 }

@@ -1,215 +1,129 @@
+<!--
+Copyright 2020 SpinalCom - www.spinalcom.com
+
+This file is part of SpinalCore.
+
+Please read all of the following terms and conditions
+of the Free Software license Agreement ("Agreement")
+carefully.
+
+This Agreement is a legally binding contract between
+the Licensee (as defined below) and SpinalCom that
+sets forth the terms and conditions that govern your
+use of the Program. By installing and/or using the
+Program, you agree to abide by all the terms and
+conditions stated or referenced herein.
+
+If you do not agree to abide by these terms and
+conditions, do not demonstrate your acceptance and do
+not install or use the Program.
+You should have received a copy of the license along
+with this file. If not, see
+<http://resources.spinalcom.com/licenses.pdf>.
+-->
+
 <template>
-  <div v-if="sidebarData"
-       class="container-fluid">
-    <app-header :digitalTwinName="digitaltwinName"></app-header>
-    <div class="main-content"
-         data-app>
-      <div class="sidebarContext-display">
-        <app-sidebar :floors="sidebarData.floors"
-                     @selectFloor="selecFloor"
-                     :rooms="sidebarData.rooms"
-                     :allData="sidebarData"></app-sidebar>
-
-      </div>
-
-      <div class="view-container">
-        <app-viewer class="app-viewer-display"></app-viewer>
-
-        <app-container class="dataViewDisplay"
-                       :allData="calendarData"
-                       :itemSelected="calendarItemSelected"
-                       @reload="reloadAllData"
-                       @selectItem="selectItem"></app-container>
-      </div>
+  <el-container class="body-container" v-loading="loading">
+    <el-header class="main-header">
+      <spinal-header></spinal-header>
+    </el-header>
+    <spinalNavbar class="main-navbar"></spinalNavbar>
+    <div class="body-main-container">
+      <el-aside width="201px" class="side-bar-container">
+        <spinal-side-bar></spinal-side-bar>
+      </el-aside>
+      <mainContent></mainContent>
     </div>
-  </div>
+  </el-container>
 </template>
 
 <script>
 import Vue from "vue";
-import appViewer from "./components/viewer/viewer.vue";
-import appHeader from "./components/header/header.vue";
-import sidebar from "./components/sidebar/sidebar.vue";
-
-import appContainer from "./components/container/container.vue";
-
-import dataService from "./config/data";
-
-import utilities from "./js/utilities";
+import spinalHeader from "./compoments/header/header";
+import spinalSideBar from "./compoments/sidebar/sidebar";
+import spinalBackEnd from "./services/spinalBackend";
+import spinalNavbar from "./compoments/navbar/spinalNavbar";
+import mainContent from "./compoments/mainContent/index";
+import { errorDialog } from "./services/utlils/errorDialog";
+import DocumentReady from "./services/utlils/DocumentReady";
+import { getDefaultLanguage } from "./services/i18n";
 
 export default Vue.extend({
   data() {
     return {
-      digitaltwinName: "",
-      calendarData: null,
-      sidebarData: null,
-      calendarItemSelected: null,
-      floorSelected: null,
-      bindObj: []
+      loading: true
     };
   },
   components: {
-    "app-sidebar": sidebar,
-    "app-viewer": appViewer,
-    "app-header": appHeader,
-    "app-container": appContainer
+    "spinal-header": spinalHeader,
+    "spinal-side-bar": spinalSideBar,
+    mainContent,
+    spinalNavbar
   },
-  created() {
-    dataService.getAllData().then(allData => {
-      this.sidebarData = allData;
-    });
-
-    setTimeout(() => {
-      this.bindAllData();
-    }, 3000);
-
-    utilities.getAllData().then(allData => {
-      this.digitaltwinName = utilities.getDigiDigitaltwinName();
-      this.calendarData = allData;
-    });
-  },
-  methods: {
-    //////////////////////////////////////////////////////////////////
-    //                     calendar Data                            //
-    //////////////////////////////////////////////////////////////////
-
-    selectItem(res) {
-      this.calendarItemSelected = res;
-    },
-
-    reloadAllData() {
-      utilities.getAllData().then(allData => {
-        this.calendarData = allData;
-      });
-    },
-
-    //////////////////////////////////////////////////////////////////
-    //                      SIDEBAR                                 //
-    //////////////////////////////////////////////////////////////////
-
-    bindAllData() {
-      let self = this;
-      this.bindObj.push(dataService.ContextNode);
-      this.bindObj.push(
-        dataService.ContextNode.bind(function() {
-          self.refreshBind();
-          dataService.getAllData().then(allData => {
-            self.updateData(allData);
-          });
-        }, false)
-      );
-
-      for (var ProcessNode in dataService.ProcessNodes) {
-        this.bindObj.push(dataService.ProcessNodes[ProcessNode]);
-        this.bindObj.push(
-          dataService.ProcessNodes[ProcessNode].bind(function() {
-            self.refreshBind();
-            dataService.getAllData().then(allData => {
-              self.updateData(allData);
-            });
-          }, false)
-        );
-      }
-
-      for (var Node in dataService.StepsNodes) {
-        this.bindObj.push(dataService.StepsNodes[Node]);
-        this.bindObj.push(
-          dataService.StepsNodes[Node].bind(function() {
-            self.refreshBind();
-            dataService.getAllData().then(allData => {
-              self.updateData(allData);
-            });
-          }, false)
-        );
-      }
-
-      setTimeout(function() {
-        //     console.log("binobj = ", self.bindObj);
-      }, 2000);
-    },
-    refreshBind() {
-      let iterator = 0;
-
-      while (iterator > this.bindObj.length) {
-        this.bindObj[iterator].unbind(this.bindObj[iterator + 1]);
-        iterator = iterator + 2;
-      }
-    },
-    updateData(data) {
-      let self = this;
-      setTimeout(function() {
-        self.sidebarData = data;
-        self.bindAllData();
-      }, 500);
-      //EventBus.$emit("test", data);
-    },
-    onCollapsed(value) {
-      this.collapseMenu = value;
-    },
-
-    selecFloor(id) {
-      let self = this;
-      this.sidebarData.floors.forEach(function(el) {
-        if (el.id === id) {
-          self.floorSelected = el.name;
-        }
+  async mounted() {
+    try {
+      await spinalBackEnd.getGraph();
+      this.loading = false;
+    } catch (e) {
+      DocumentReady(async () => {
+        await getDefaultLanguage();
+        console.error(e);
+        console.log(this.$t("error.returntodrive.confirmbtntext"));
+        const title = this.$t("error.returntodrive.title");
+        const comfimText = this.$t("error.returntodrive.confirmbtntext");
+        const msg = this.$t("error.returntodrive.text");
+        errorDialog.call(this, title, comfimText, msg, e);
       });
     }
-  }
+  },
+  methods: {}
 });
 </script>
 
 <style scoped>
-.roomcontext {
-  position: absolute;
-  /*min-height: calc(100%);*/
-  margin-left: 11%;
-  width: calc(16%);
+.body-container {
+  height: 100%;
+  width: 100%;
+  display: flex;
 }
-.container-fluid {
-  width: 100vw;
-  height: 100vh;
-  font-family: sans-serif;
+.body-main-container {
+  height: 100%;
+  min-height: 0;
+  flex-grow: 1;
+  display: flex;
+  position: relative;
 }
-.main-content {
-  width: 100vw;
-  height: calc(100vh - 64px);
+.side-bar-container {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+  width: 201px;
   overflow: hidden;
-  position: relative;
-  display: flex;
-}
-.sidebarContext-display {
-  height: 100%;
-  width: 191px;
-}
-.app-viewer-display {
-  height: 100%;
-  width: 50%;
-}
-.dataViewDisplay {
-  background-color: rgba(1, 2, 1, 0);
-  width: 50%;
   height: 100%;
   position: relative;
 }
+.side-bar-container * {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.side-bar-container span {
+  width: 100%;
+}
+
+.main-header {
+  width: 100%;
+  padding: 0 0 0 0;
+  margin-bottom: 2px;
+}
+.main-navbar {
+  display: none;
+}
+
 @media screen and (max-width: 992px) {
-  .app-viewer-display {
-    height: 50%;
-    width: 100%;
+  .side-bar-container {
+    display: none;
   }
-  .dataViewDisplay {
-    width: 100%;
-    height: 50%;
+  .main-navbar {
+    display: flex;
   }
-}
-.view-container {
-  width: calc(100% - 191px);
-  position: relative;
-  display: flex;
-  flex-wrap: wrap;
-}
-.view-container,
-.view-container > * {
-  transition: 500ms all cubic-bezier(0.075, 0.82, 0.165, 1);
 }
 </style>
